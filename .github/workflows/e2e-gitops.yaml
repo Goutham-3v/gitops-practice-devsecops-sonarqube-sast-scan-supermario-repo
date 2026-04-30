@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'version.txt'   # 🔥 prevents infinite loop
 
 permissions:
   contents: write
@@ -32,12 +34,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ✅ safer version handling
       - name: Set Version
         id: version
         run: |
-          VERSION=$(($(cat version.txt 2>/dev/null || echo 0) + 1))
-          echo "VERSION=$VERSION"
+          VERSION=$(($(cat version.txt) + 1))
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub
@@ -63,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_scan_push_image
 
+    # 🔥 prevents self-trigger loop
+    if: github.actor != 'github-actions[bot]'
+
     steps:
       - uses: actions/checkout@v4
 
@@ -75,23 +78,19 @@ jobs:
         run: |
           VERSION=${{ needs.build_scan_push_image.outputs.version }}
 
-          echo "----- BEFORE -----"
-          cat deployment.yaml
+          echo "Updating to version $VERSION"
 
-          # ✅ robust replacement (fixes your main bug)
-          sed -i "s|\(image:.*supermariogitopsproject:\).*|\1${VERSION}|" deployment.yaml
+          # Replace placeholder
+          sed -i "s|{{VERSION}}|${VERSION}|g" deployment.yaml
 
-          echo "----- AFTER -----"
-          cat deployment.yaml
-
+          # Update version file
           echo $VERSION > version.txt
 
           git add deployment.yaml version.txt
 
-          # ✅ commit only if changed
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update image tag to ${VERSION}"
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
-          fi
+          git diff --quiet && echo "No changes" || git commit -m "Update image tag to ${VERSION}"
+
+          # 🔥 CRITICAL FIX (your missing piece)
+          git pull origin main --rebase
+
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
