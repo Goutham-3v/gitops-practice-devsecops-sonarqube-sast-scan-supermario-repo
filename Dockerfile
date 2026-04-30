@@ -1,19 +1,18 @@
-# Use an official Tomcat image as a base image
-FROM tomcat:9.0.14-jre8-alpine
+# Use a modern, patched Tomcat image
+FROM tomcat:9.0-jdk17-temurin
 
 LABEL maintainer="github.com/Goutham-3v"
 
-# Remove default Tomcat application
-RUN rm -rf /usr/local/tomcat/webapps/ROOT/*
+# Remove default apps
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy your web application to the Tomcat webapps directory
+# Copy your app
 COPY webapp/ /usr/local/tomcat/webapps/ROOT/
 
-# Change the default shell to bash
-RUN ln -sf /bin/bash /bin/sh
+# Security: run as non-root
+RUN useradd -m tomcatuser
+USER tomcatuser
 
-# Expose the default Tomcat port
 EXPOSE 8080
 
-# Start Tomcat when the container starts
 CMD ["catalina.sh", "run"]
