@@ -1,29 +1,26 @@
 name: Container Scan - Super Mario
 
-#on:
-#  push:
-#    branches:
-#      - main
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   scan:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. Build image locally
       - name: Build Docker Image
         run: |
-          docker build -t supermario-app:latest .
+          docker build -t supermario-app:${{ github.run_number }} .
 
-      # 3. Scan image (FIXED)
       - name: Scan Image with Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.20.0
         with:
-          image-ref: supermario-app:latest
+          image-ref: supermario-app:${{ github.run_number }}
           format: table
-          exit-code: '0'
+          exit-code: '0'   # change to '1' if you want strict failure
           severity: 'CRITICAL,HIGH'

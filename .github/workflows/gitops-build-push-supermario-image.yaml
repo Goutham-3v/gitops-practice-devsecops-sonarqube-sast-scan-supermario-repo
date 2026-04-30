@@ -5,18 +5,23 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build_push_supermario_docker_image:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
+      # ✅ safe version handling
       - name: Set Version
         id: version
         run: |
-          VERSION=$(($(cat version.txt) + 1))
+          VERSION=$(($(cat version.txt 2>/dev/null || echo 0) + 1))
+          echo "VERSION=$VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Login to Docker Hub
@@ -27,6 +32,13 @@ jobs:
           docker build -t docker.io/thegoutham/supermariogitopsproject:${VERSION} .
           docker push docker.io/thegoutham/supermariogitopsproject:${VERSION}
 
-      - name: Update version.txt
+      # ✅ THIS is what you were missing
+      - name: Update version.txt and push
         run: |
           echo $VERSION > version.txt
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions[bot]"
+
+          git add version.txt
+          git commit -m "Update version to ${VERSION}" || echo "No changes"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main

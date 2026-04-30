@@ -32,21 +32,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ✅ safer version handling
       - name: Set Version
         id: version
         run: |
-          VERSION=$(($(cat version.txt) + 1))
+          VERSION=$(($(cat version.txt 2>/dev/null || echo 0) + 1))
+          echo "VERSION=$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # 🔹 Build image locally (DO NOT push yet)
       - name: Build Image
         run: |
           docker build -t supermario:${{ steps.version.outputs.version }} .
 
-      # 🔹 Scan BEFORE pushing (critical fix)
       - name: Scan Image with Trivy
         uses: aquasecurity/trivy-action@v0.20.0
         with:
@@ -54,7 +54,6 @@ jobs:
           exit-code: '0'
           severity: 'CRITICAL,HIGH'
 
-      # 🔹 Push ONLY if scan passes
       - name: Tag and Push Image
         run: |
           docker tag supermario:${{ steps.version.outputs.version }} docker.io/thegoutham/supermariogitopsproject:${{ steps.version.outputs.version }}
@@ -76,11 +75,23 @@ jobs:
         run: |
           VERSION=${{ needs.build_scan_push_image.outputs.version }}
 
-          sed -i "s|image: thegoutham/supermariogitopsproject:.*$|image: thegoutham/supermariogitopsproject:${VERSION}|" deployment.yaml
+          echo "----- BEFORE -----"
+          cat deployment.yaml
+
+          # ✅ robust replacement (fixes your main bug)
+          sed -i "s|\(image:.*supermariogitopsproject:\).*|\1${VERSION}|" deployment.yaml
+
+          echo "----- AFTER -----"
+          cat deployment.yaml
+
           echo $VERSION > version.txt
 
           git add deployment.yaml version.txt
 
-          git diff --quiet && echo "No changes to commit" || git commit -m "Update image tag to ${VERSION}"
-
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          # ✅ commit only if changed
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update image tag to ${VERSION}"
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main
+          fi
