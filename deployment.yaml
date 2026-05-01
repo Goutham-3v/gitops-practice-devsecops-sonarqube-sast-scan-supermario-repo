@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: supermariogame-container
-        image: thegoutham/supermariogitopsproject:{{VERSION}}
+        image: thegoutham/supermariogitopsproject:latest
         imagePullPolicy: Always   # 🔥 Forces Kubernetes to pull latest image
         ports:
         - containerPort: 8080
