@@ -1,9 +1,9 @@
 name: Container Scan - Super Mario
 
-on:
-  push:
-    branches:
-      - main
+#on:
+#  push:
+#    branches:
+#      - main
 
 jobs:
   scan:
@@ -22,5 +22,5 @@ jobs:
         with:
           image-ref: supermario-app:${{ github.run_number }}
           format: table
-          exit-code: '0'   # change to '1' if you want strict failure
+          exit-code: '0'   
           severity: 'CRITICAL,HIGH'
