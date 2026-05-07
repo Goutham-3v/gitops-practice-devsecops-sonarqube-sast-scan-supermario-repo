@@ -1,31 +1,31 @@
-# name: Run SAST Scan on SuperMario Game Project
+name: Run SAST Scan on SuperMario Game Project
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-#   sonarqube_sast_scan:
-#     runs-on: ubuntu-latest
+jobs:
+  sonarqube_sast_scan:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-#       - name: SonarQube Scan
-#         uses: sonarsource/sonarqube-scan-action@v2
-#         env:
-#           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-#       - name: Debug Sonar Output
-#         run: ls -la .scannerwork || true
+      - name: Debug Sonar Output
+        run: ls -la .scannerwork || true
 
-#       - name: SonarQube Quality Gate Check
-#         uses: sonarsource/sonarqube-quality-gate-action@v1
-#         timeout-minutes: 5
-#         env:
-#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarQube Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -1,26 +1,26 @@
-# name: Container Scan - Super Mario
+name: Container Scan - Super Mario
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-#   scan:
-#     runs-on: ubuntu-latest
+jobs:
+  scan:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-#       - name: Build Docker Image
-#         run: |
-#           docker build -t supermario-app:${{ github.run_number }} .
+      - name: Build Docker Image
+        run: |
+          docker build -t supermario-app:${{ github.run_number }} .
 
-#       - name: Scan Image with Trivy
-#         uses: aquasecurity/trivy-action@v0.20.0
-#         with:
-#           image-ref: supermario-app:${{ github.run_number }}
-#           format: table
-#           exit-code: '0'   
-#           severity: 'CRITICAL,HIGH'
+      - name: Scan Image with Trivy
+        uses: aquasecurity/trivy-action@v0.20.0
+        with:
+          image-ref: supermario-app:${{ github.run_number }}
+          format: table
+          exit-code: '0'   
+          severity: 'CRITICAL,HIGH'
