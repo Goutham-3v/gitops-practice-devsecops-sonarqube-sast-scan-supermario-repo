@@ -8,6 +8,17 @@ pipeline {
     }
 
     stages {
+        stage('Check Commit') {
+            steps {
+                script {
+                    // Stop if this is an automated commit
+                    def commitMsg = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    if (commitMsg.contains('[skip ci]') || commitMsg.contains('Update image tag')) {
+                        currentBuild.result = 'NOT_BUILT'
+                        error('Skipping automated commit')
+                    }
+                }
+            }
         stage('Checkout') {
             steps {
                 git branch: 'main',
