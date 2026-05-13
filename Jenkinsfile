@@ -75,6 +75,18 @@ pipeline {
             }
         }
 
+        stage('Skip Jenkins Auto Commit') {
+            steps {
+                script {
+                    def msg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+
+                    if (msg.startsWith("Updated image to version") || msg.startsWith("Update image tag")) {
+                        currentBuild.result = 'NOT_BUILT'
+                        error("Skipping build because this commit was created by Jenkins")
+                    }
+                }
+            }
+        }
 
     }
 }
