@@ -4,6 +4,7 @@ metadata:
   name: supermariogame-deployment
 spec:
   replicas: 2
+  revisionHistoryLimit: 2
   selector:
     matchLabels:
       app: supermariogame
