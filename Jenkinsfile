@@ -37,6 +37,19 @@ pipeline {
             }
         }
 
+        stage('Generate Image Tag') {
+            steps {
+                script {
+                    env.IMAGE_TAG = sh(
+                        script: "cat version.txt",
+                        returnStdout: true
+                    ).trim()
+                }
+
+                echo "Image Tag: ${IMAGE_TAG}"
+            }
+        }
+
         stage('Update deployment.yaml') {
             steps {
 
@@ -61,5 +74,7 @@ pipeline {
                 }
             }
         }
+
+
     }
 }
