@@ -8,7 +8,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -25,8 +24,7 @@ pipeline {
 
                     if (msg.contains("[skip ci]")) {
                         env.SKIP_BUILD = "true"
-                        currentBuild.result = 'SUCCESS'
-                        echo "Skipping build because commit contains [skip ci]"
+                        echo "Skipping Jenkins auto-created commit"
                     }
                 }
             }
@@ -76,11 +74,7 @@ pipeline {
                     sed -i "s|image: thegoutham/supermariogitopsproject:.*|image: thegoutham/supermariogitopsproject:$IMAGE_TAG|" k8s/deployment.yaml
 
                     git add k8s/deployment.yaml
-
                     git commit -m "ci: update image tag to $IMAGE_TAG [skip ci]" || echo "No changes to commit"
-
-                    git pull origin main --rebase
-
                     git push https://$GIT_USER:$GIT_PASS@github.com/Goutham-3v/gitops-practice-devsecops-sonarqube-sast-scan-supermario-repo.git HEAD:main
                     '''
                 }
