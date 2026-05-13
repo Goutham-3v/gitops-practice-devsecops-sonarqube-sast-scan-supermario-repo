@@ -49,7 +49,7 @@ Mario.WinState.prototype.Update = function(delta) {
     if (this.waitTime > 0) {
         this.waitTime -= delta;
     } else {
-        if (Enjine.KeyboardInput.IsKeyDown(Enjine.Keys.S)) {
+        if (Enjine.KeyboardInput.IsKeyDown(Enjine.Keys.Y)) {
             this.wasKeyDown = true;
         }
     }
@@ -61,7 +61,7 @@ Mario.WinState.prototype.Draw = function(context) {
 
 Mario.WinState.prototype.CheckForChange = function(context) {
     if (this.waitTime <= 0) {
-        if (this.wasKeyDown && !Enjine.KeyboardInput.IsKeyDown(Enjine.Keys.S)) {
+        if (this.wasKeyDown && !Enjine.KeyboardInput.IsKeyDown(Enjine.Keys.Y)) {
             context.ChangeState(new Mario.TitleState());
         }
     }
